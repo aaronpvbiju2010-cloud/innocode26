@@ -1,1 +1,348 @@
-coming soon
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta
+    name="description"
+    content="Give AC condensate another job. Find and collect free non-potable water from local buildings."
+  >
+
+  <title>DripLoop — Every drop deserves another job</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <script src="data.js" defer></script>
+  <script src="matching.js" defer></script>
+  <script src="app.js" defer></script>
+  <script src="ui.js" defer></script>
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header wrap">
+    <a class="brand" href="./">
+      DripLoop
+      <span>Every drop deserves another job.</span>
+    </a>
+
+    <button
+      id="contrast-toggle"
+      class="secondary"
+      type="button"
+      aria-pressed="false"
+    >
+      High contrast
+    </button>
+  </header>
+
+  <main id="main" class="wrap">
+    <section class="hero">
+      <p class="eyebrow">
+        Recovered water. Local possibilities.
+      </p>
+
+      <h1>
+        Your AC is making free water. Stop pouring it down the drain.
+      </h1>
+
+      <p>
+        Connect water collected by local buildings with people
+        who can put it to work. Find a source, claim your litres
+        and arrange collection.
+      </p>
+
+      <div
+        class="role-switch"
+        role="group"
+        aria-label="Choose Building or Collector view"
+      >
+        <button
+          id="collector-view"
+          type="button"
+          aria-pressed="true"
+        >
+          View as Collector
+        </button>
+
+        <button
+          id="building-view"
+          class="secondary"
+          type="button"
+          aria-pressed="false"
+        >
+          View as Building
+        </button>
+      </div>
+    </section>
+
+    <section class="impact" aria-label="Confirmed water reuse">
+      <div>
+        <strong id="impact-litres">0 L</strong>
+        <span>Water reused</span>
+      </div>
+
+      <div>
+        <strong id="impact-water">Awaiting factor</strong>
+        <span>Desalinated water saved · estimate</span>
+      </div>
+
+      <div>
+        <strong id="impact-co2">Awaiting factor</strong>
+        <span>CO₂ avoided · estimate</span>
+      </div>
+
+      <p id="impact-note">
+        Every confirmed collection counts.
+      </p>
+    </section>
+
+    <p class="demo-note">
+      Fictional demo buildings · Records are saved in this browser.
+    </p>
+
+    <p class="demo-note">
+      <strong>Non-potable water only.</strong>
+      AC condensate may contain bacteria or metals from coils
+      and storage. Never use it for drinking, cooking or animal
+      drinking water.
+    </p>
+
+    <p id="notice" role="status" aria-live="polite"></p>
+
+    <section id="collector-panel" class="panel">
+      <h2>What do you need water for?</h2>
+
+      <form id="search-form" class="search-row">
+        <label class="grow" for="water-search">
+          Tell us the job
+          <input
+            id="water-search"
+            type="search"
+            placeholder="Try plants, car wash or concrete curing"
+          >
+        </label>
+
+        <button type="submit">Find water</button>
+
+        <button
+          id="clear-search"
+          class="secondary"
+          type="button"
+        >
+          Show all sources
+        </button>
+      </form>
+
+      <div
+        id="match-result"
+        aria-live="polite"
+        hidden
+      ></div>
+    </section>
+
+    <section id="building-panel" class="panel" hidden>
+      <h2>Give your collected water another job</h2>
+
+      <p>
+        List the litres ready to collect. Collection is free.
+      </p>
+
+      <form id="post-form" class="form-grid">
+        <label for="source">
+          Building name
+          <input
+            id="source"
+            name="source"
+            maxlength="100"
+            required
+            placeholder="e.g. Palmline Logistics Warehouse"
+          >
+        </label>
+
+        <label for="source-type">
+          Building type
+          <select
+            id="source-type"
+            name="sourceType"
+            required
+          >
+            <option value="">Choose a building type</option>
+            <option value="warehouse">Warehouse</option>
+            <option value="factory">Factory</option>
+            <option value="mall">Mall</option>
+            <option value="school">School</option>
+          </select>
+        </label>
+
+        <label for="area">
+          Area
+          <select id="area" name="area" required>
+            <option value="">Choose an area</option>
+            <option>Sajaa</option>
+            <option>Al Jurf</option>
+            <option>Emirates Industrial City</option>
+            <option>Ajman Industrial</option>
+          </select>
+        </label>
+
+        <label for="litres">
+          Litres available now
+          <input
+            id="litres"
+            name="litres"
+            type="number"
+            min="1"
+            step="0.1"
+            required
+            placeholder="e.g. 450"
+          >
+        </label>
+
+        <label for="frequency">
+          Collection frequency
+          <select
+            id="frequency"
+            name="frequency"
+            required
+          >
+            <option value="one-off">One-off collection</option>
+            <option value="daily">Daily stream</option>
+          </select>
+        </label>
+
+        <label for="tank-full-by">
+          Tank full by · UAE time (UTC+4)
+          <input
+            id="tank-full-by"
+            name="tankFullBy"
+            type="datetime-local"
+            required
+          >
+        </label>
+
+        <label for="access">
+          Collection access
+          <select id="access" name="access" required>
+            <option value="jerrycan">Jerrycan collection</option>
+            <option value="tanker">Tanker access</option>
+          </select>
+        </label>
+
+        <label class="full" for="quality-note">
+          Water quality and collection notes
+          <textarea
+            id="quality-note"
+            name="qualityNote"
+            rows="4"
+            maxlength="1000"
+            required
+            placeholder="Describe storage, treatment or testing, known concerns and collection instructions. State if quality is untested."
+          ></textarea>
+        </label>
+
+        <p class="full demo-note">
+          List AC condensate collected separately from sewage
+          and industrial wastewater. Include known contamination
+          or maintenance concerns. All listings are for
+          non-potable reuse.
+        </p>
+
+        <button class="full" type="submit">
+          Make these litres available
+        </button>
+      </form>
+    </section>
+
+    <section aria-labelledby="listings-heading">
+      <div class="section-heading">
+        <h2 id="listings-heading">Water ready for another job</h2>
+        <span id="listing-count"></span>
+      </div>
+
+      <div id="listings" class="cards"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="claims-heading">
+      <h2 id="claims-heading">From claimed to collected</h2>
+
+      <p>
+        Confirm pickup once the water has been collected.
+        That is when it counts towards reuse.
+      </p>
+
+      <div id="claims" class="claim-list"></div>
+    </section>
+
+    <section class="demo-controls" aria-label="Demo controls">
+      <button
+        id="load-demo"
+        class="secondary"
+        type="button"
+      >
+        Load demo data
+      </button>
+
+      <button
+        id="reset-demo"
+        class="secondary"
+        type="button"
+      >
+        Reset demo
+      </button>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    DripLoop · Collected from cooling. Passed on with purpose.
+  </footer>
+
+  <dialog id="claim-dialog" aria-labelledby="claim-title">
+    <form id="claim-form">
+      <h2 id="claim-title">Give these litres a destination</h2>
+
+      <p id="claim-details"></p>
+
+      <label for="claim-litres">
+        Litres to collect
+        <input
+          id="claim-litres"
+          type="number"
+          step="0.1"
+          required
+        >
+      </label>
+
+      <label for="claim-tap">
+        Would you otherwise use tap water?
+        <select id="claim-tap" required>
+          <option value="">Choose an answer</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </label>
+
+      <p class="demo-note">
+        Non-potable water. Check its quality and treatment
+        needs for your intended use before collection.
+      </p>
+
+      <p id="claim-error" role="alert"></p>
+
+      <div class="actions">
+        <button type="submit">Confirm claim</button>
+
+        <button
+          id="cancel-claim"
+          class="secondary"
+          type="button"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>
