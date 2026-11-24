@@ -1,1 +1,185 @@
-coming soon
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="LoopYard: UAE workshops list leftover materials, makers claim them.">
+  <title>LoopYard</title>
+  <style>
+    :root { --ink:#1d2421; --muted:#5b6661; --bg:#f6f4ef; --card:#fff; --accent:#2f7d5b; --line:#ddd8cc; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color:var(--ink); background:var(--bg); line-height:1.5; }
+    header, main, footer { max-width: 960px; margin: 0 auto; padding: 0 16px; }
+    header { padding-top: 24px; }
+    h1 { margin: 0; font-size: 2rem; }
+    .tagline { margin: 4px 0 16px; color: var(--muted); }
+    section { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:16px; margin:16px 0; }
+    .toggle { display:inline-flex; border:1px solid var(--accent); border-radius:6px; overflow:hidden; }
+    .toggle button { border:0; padding:8px 14px; background:transparent; color:var(--accent); cursor:pointer; font:inherit; }
+    .toggle button[aria-pressed="true"] { background:var(--accent); color:#fff; }
+    form { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px; }
+    .field { display:flex; flex-direction:column; gap:4px; }
+    .field.wide { grid-column: 1 / -1; }
+    .check { flex-direction:row; align-items:center; gap:8px; }
+    input, select, textarea, button { font:inherit; }
+    input, select, textarea { padding:8px; border:1px solid var(--line); border-radius:6px; background:#fff; }
+    button.primary { background:var(--accent); color:#fff; border:0; border-radius:6px; padding:10px 16px; cursor:pointer; }
+    :focus-visible { outline: 3px solid #e0a526; outline-offset: 2px; }
+    .impact { display:flex; gap:24px; flex-wrap:wrap; }
+    .impact strong { display:block; font-size:1.8rem; color:var(--accent); }
+    .hint { color:var(--muted); font-size:.9rem; }
+    [hidden] { display:none !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>LoopYard</h1>
+    <p class="tagline">One factory's waste is another's raw material</p>
+
+    <div class="toggle" role="group" aria-label="Choose your view">
+      <button type="button" id="view-factory" data-view="factory" aria-pressed="true">View as Factory</button>
+      <button type="button" id="view-maker" data-view="maker" aria-pressed="false">View as Maker</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Impact counter -->
+    <section id="impact" aria-labelledby="impact-heading">
+      <h2 id="impact-heading">Impact so far</h2>
+      <div class="impact" aria-live="polite">
+        <p><strong id="kg-diverted">0</strong> kg diverted from landfill</p>
+        <p><strong id="co2-avoided">0</strong> kg CO₂ avoided (est.)</p>
+      </div>
+    </section>
+
+    <!-- Factory view: post a material -->
+    <section id="factory-view" data-view-panel="factory" aria-labelledby="post-heading">
+      <h2 id="post-heading">Post leftover material</h2>
+      <form id="post-form" aria-label="Post a material listing" novalidate>
+        <div class="field">
+          <label for="factory">Factory / workshop name</label>
+          <input id="factory" name="factory" type="text" required autocomplete="organization">
+        </div>
+
+        <div class="field">
+          <label for="area">Area</label>
+          <select id="area" name="area" required>
+            <option value="">Select area</option>
+            <option value="Sajaa">Sajaa</option>
+            <option value="Al Jurf">Al Jurf</option>
+            <option value="Emirates Industrial City">Emirates Industrial City</option>
+            <option value="Ajman Industrial">Ajman Industrial</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="category">Category</label>
+          <select id="category" name="category" required>
+            <option value="">Select category</option>
+            <option value="wood">Wood</option>
+            <option value="mdf">MDF</option>
+            <option value="acrylic">Acrylic</option>
+            <option value="plastic">Plastic</option>
+            <option value="fabric">Fabric</option>
+            <option value="crates">Crates</option>
+          </select>
+        </div>
+
+        <div class="field wide">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" rows="3" required
+            aria-describedby="description-hint"></textarea>
+          <span id="description-hint" class="hint">e.g. "18mm MDF offcuts, white laminate one side"</span>
+        </div>
+
+        <div class="field">
+          <label for="pieceSize">Typical piece size</label>
+          <input id="pieceSize" name="pieceSize" type="text" placeholder="e.g. 60 × 40 cm">
+        </div>
+
+        <div class="field">
+          <label for="kg">Approx. weight (kg)</label>
+          <input id="kg" name="kg" type="number" min="1" step="1" inputmode="numeric" required>
+        </div>
+
+        <div class="field">
+          <label for="price">Price</label>
+          <select id="price" name="price" required>
+            <option value="Free">Free</option>
+            <option value="Token">Token</option>
+            <option value="Negotiable">Negotiable</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="deadline">Collect by</label>
+          <input id="deadline" name="deadline" type="date" required>
+        </div>
+
+        <div class="field">
+          <label for="vehicle">Vehicle needed</label>
+          <select id="vehicle" name="vehicle" required>
+            <option value="car">Car</option>
+            <option value="pickup">Pickup</option>
+            <option value="3-ton truck">3-ton truck</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="condition">Condition</label>
+          <select id="condition" name="condition">
+            <option value="new offcut">New offcut</option>
+            <option value="used - clean">Used – clean</option>
+            <option value="used - worn">Used – worn</option>
+          </select>
+        </div>
+
+        <div class="field wide">
+          <label for="prevContents">Previous contents (for containers/crates)</label>
+          <input id="prevContents" name="prevContents" type="text" placeholder="e.g. dry food, none">
+        </div>
+
+        <div class="field check wide">
+          <input id="loadingHelp" name="loadingHelp" type="checkbox">
+          <label for="loadingHelp">We can help with loading</label>
+        </div>
+
+        <div class="field check wide">
+          <input id="nonHazardous" name="nonHazardous" type="checkbox" required aria-required="true">
+          <label for="nonHazardous">I confirm this material is non-hazardous (required)</label>
+        </div>
+
+        <div class="field wide">
+          <button type="submit" class="primary">Post listing</button>
+          <p id="form-status" class="hint" role="status" aria-live="polite"></p>
+        </div>
+      </form>
+    </section>
+
+    <!-- Maker view: search -->
+    <section id="maker-view" data-view-panel="maker" aria-labelledby="search-heading" hidden>
+      <h2 id="search-heading">Find materials</h2>
+      <form id="search-form" role="search" aria-label="Search materials">
+        <label for="search">What are you making?</label>
+        <input id="search" name="search" type="search" placeholder="e.g. a planter box, a tote bag">
+        <button type="submit" class="primary">Search</button>
+      </form>
+      <div id="search-results" aria-live="polite" aria-label="Search results"></div>
+    </section>
+
+    <!-- All listings -->
+    <section id="listings-section" aria-labelledby="listings-heading">
+      <h2 id="listings-heading">Available listings</h2>
+      <ul id="listings" aria-label="Material listings"></ul>
+    </section>
+  </main>
+
+  <footer>
+    <p class="hint">LoopYard · UAE</p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="matching.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
