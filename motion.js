@@ -1,29 +1,23 @@
-// Illustrated DripLoop.
-// Replace the previous motion.js and load after ui.js.
+// Load after ui.js.
+// Add the coastal introduction and optional movement.
 
 (() => {
   const byId = id =>
     document.getElementById(id);
 
-  const root = document.documentElement;
-
-  const reduced = matchMedia(
+  const reducedMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)"
   );
 
-  const finePointer = matchMedia(
-    "(hover: hover) and (pointer: fine)"
-  );
+  const motionKey = "driploop-motion-paused";
 
   let userPaused = false;
 
   try {
     userPaused =
-      localStorage.getItem(
-        "driploop-motion-paused"
-      ) === "true";
+      localStorage.getItem(motionKey) === "true";
   } catch {
-    // Use the default when storage is unavailable.
+    // Continue with the default when storage is unavailable.
   }
 
   function node(tag, text, className) {
@@ -40,117 +34,125 @@
     return result;
   }
 
-  function button(text, action, className) {
-    const result = node(
-      "button",
-      text,
-      className
-    );
-
-    result.type = "button";
-    result.addEventListener("click", action);
-
-    return result;
-  }
-
-  // Rename the visible palette while keeping its saved key.
-  const oceanButton = [
-    ...document.querySelectorAll(
-      ".palette-option"
-    )
-  ].find(item =>
-    item.textContent.trim() === "Ocean"
-  );
-
-  const oceanLabel =
-    oceanButton?.querySelector(
-      "span:last-child"
-    );
-
-  if (oceanLabel) {
-    oceanLabel.textContent = "Midnight";
-  }
-
-  let savedAppearance = null;
+  // Introduce Ocean/Dark once.
+  // Later visits keep the user's chosen appearance.
+  let firstVisit = true;
 
   try {
-    savedAppearance = localStorage.getItem(
-      "driploop-appearance-v1"
-    );
+    firstVisit =
+      localStorage.getItem(
+        "driploop-coastal-intro"
+      ) !== "seen";
   } catch {
-    // Continue with the default appearance.
+    // Show the new default if preferences cannot be read.
   }
 
-  if (!savedAppearance) {
-    document.querySelectorAll(
-      ".mode-options button"
-    )[1]?.click();
+  if (firstVisit) {
+    const modeButtons =
+      document.querySelectorAll(
+        ".mode-options button"
+      );
+
+    modeButtons[1]?.click();
+
+    const oceanButton = [
+      ...document.querySelectorAll(
+        ".palette-option"
+      )
+    ].find(control =>
+      control.textContent.trim() === "Ocean"
+    );
 
     oceanButton?.click();
+
+    try {
+      localStorage.setItem(
+        "driploop-coastal-intro",
+        "seen"
+      );
+    } catch {
+      // Theme changes still work for this visit.
+    }
   }
 
-  // Original illustrated background.
-  const art = node(
-    "div",
-    undefined,
-    "night-art"
-  );
-
-  art.setAttribute(
-    "aria-hidden",
-    "true"
-  );
-
-  const picture = node(
-    "div",
-    undefined,
-    "night-picture"
-  );
-
-  const lights = node(
-    "div",
-    undefined,
-    "night-lights"
-  );
-
-  for (let index = 0; index < 7; index += 1) {
-    const light = node("span");
-
-    light.style.setProperty(
-      "--i",
-      index
-    );
-
-    lights.append(light);
-  }
-
-  art.append(picture, lights);
-  document.body.prepend(art);
-
-  // Introduction.
-  const hero = document.querySelector(
-    ".hero"
-  );
+  const main = byId("main");
 
   const header = document.querySelector(
     ".site-header"
   );
 
+  const hero = document.querySelector(
+    ".hero"
+  );
+
+  // Place the simple instructions below the hero.
+  const steps = hero.querySelector(
+    ".how-it-works"
+  );
+
+  if (steps) {
+    main.prepend(steps);
+  }
+
+  // Create the full-width introduction.
+  const stage = node(
+    "section",
+    undefined,
+    "night-stage"
+  );
+
+  stage.setAttribute(
+    "aria-label",
+    "Welcome to DripLoop"
+  );
+
+  const scene = node(
+    "div",
+    undefined,
+    "night-scene"
+  );
+
+  scene.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+  const rings = node(
+    "div",
+    undefined,
+    "water-rings"
+  );
+
+  for (let index = 0; index < 3; index += 1) {
+    rings.append(node("span"));
+  }
+
+  scene.append(rings);
+
+  header.before(stage);
+
+  stage.append(
+    scene,
+    header,
+    hero
+  );
+
+  // Update the introduction.
   header.querySelector(
     ".brand span"
   ).textContent =
-    "Every drop has another chapter.";
+    "A second life for every drop.";
 
   hero.querySelector(
     ".eyebrow"
   ).textContent =
-    "Collected nearby. Given a new purpose.";
+    "Recovered locally. Reused thoughtfully.";
 
   hero.querySelector("h1").replaceChildren(
-    node("span", "Small drops."),
+    node("span", "Every drop."),
     node(
       "span",
-      "Big possibilities.",
+      "A second life.",
       "accent-text"
     )
   );
@@ -158,118 +160,48 @@
   hero.querySelector(
     "p:not(.eyebrow)"
   ).textContent =
-    "Your AC creates water. Help it reach a garden, a workshop or a useful job around the corner.";
+    "Free AC water for gardens, cleanups and everyday jobs. Find a source nearby and give its water somewhere useful to go.";
+
+  byId("collector-view").textContent =
+    "Find free water";
+
+  byId("collector-view").setAttribute(
+    "aria-label",
+    "Find free water — Collector view"
+  );
+
+  byId("building-view").textContent =
+    "Share your water";
+
+  byId("building-view").setAttribute(
+    "aria-label",
+    "Share your water — Building view"
+  );
 
   hero.append(
     node(
       "p",
-      "Non-potable. Never for drinking, cooking or animal drinking water.",
+      "Non-potable. Never for drinking or cooking.",
       "hero-safety"
     )
   );
 
-  // Turn the existing instructions into a collection diagram.
-  const story = hero.querySelector(
-    ".how-it-works"
-  );
+  // Use the existing Collector button handler.
+  // This also opens the correct panel from Building view.
+  function waterLink(text) {
+    const link = node("a", text);
 
-  if (story) {
-    story.classList.add("water-story");
+    link.href = "#collector-panel";
 
-    story.setAttribute(
-      "aria-label",
-      "Illustrated water collection journey"
-    );
+    link.addEventListener("click", event => {
+      event.preventDefault();
+      byId("collector-view").click();
+    });
 
-    const captions = [
-      [
-        "building",
-        "A building collects",
-        "AC water is saved in a tank."
-      ],
-      [
-        "tank",
-        "You choose your litres",
-        "Claim an amount you can collect."
-      ],
-      [
-        "plant",
-        "The water gets a new job",
-        "Confirm pickup to record reuse."
-      ]
-    ];
-
-    [...story.children].forEach(
-      (item, index) => {
-        const [kind, title, copy] =
-          captions[index];
-
-        const icon = node(
-          "div",
-          undefined,
-          "story-icon " + kind
-        );
-
-        icon.setAttribute(
-          "aria-hidden",
-          "true"
-        );
-
-        icon.append(
-          node("i"),
-          node("i"),
-          node("i")
-        );
-
-        item.replaceChildren(
-          icon,
-          node("strong", title),
-          node("span", copy)
-        );
-      }
-    );
-
-    const track = node(
-      "div",
-      undefined,
-      "flow-track"
-    );
-
-    track.setAttribute(
-      "aria-hidden",
-      "true"
-    );
-
-    track.append(
-      node("span"),
-      node("span")
-    );
-
-    const wrapper = node(
-      "section",
-      undefined,
-      "journey"
-    );
-
-    wrapper.setAttribute(
-      "aria-label",
-      "How collection works"
-    );
-
-    hero.after(wrapper);
-
-    wrapper.append(
-      track,
-      story,
-      node(
-        "p",
-        "Illustration of the collection journey.",
-        "journey-caption"
-      )
-    );
+    return link;
   }
 
-  // Navigation.
+  // Header navigation.
   const navigation = node(
     "nav",
     undefined,
@@ -281,414 +213,184 @@
     "Main navigation"
   );
 
-  const find = node(
-    "a",
-    "Find water"
-  );
-
-  find.href = "#collector-panel";
-
-  find.addEventListener(
-    "click",
-    event => {
-      event.preventDefault();
-      byId("collector-view").click();
-    }
-  );
-
-  const pickups = node(
+  const pickupsLink = node(
     "a",
     "My pickups"
   );
 
-  pickups.href = "#claims-heading";
+  pickupsLink.href = "#claims-heading";
 
-  navigation.append(find, pickups);
+  navigation.append(
+    waterLink("Find water"),
+    pickupsLink
+  );
 
   header.querySelector(
     ".appearance"
   ).before(navigation);
 
-  header.querySelector(
-    ".appearance > summary"
-  ).textContent = "Style & motion";
-
-  // Motion preference.
-  const motionButton = button(
-    "Pause animations",
-    () => {
-      userPaused = !userPaused;
-
-      try {
-        localStorage.setItem(
-          "driploop-motion-paused",
-          String(userPaused)
-        );
-      } catch {
-        // Apply the setting for this visit.
-      }
-
-      applyMotion();
-    },
-    "secondary motion-toggle"
+  // Hero footer and background-motion control.
+  const stageFooter = node(
+    "div",
+    undefined,
+    "stage-footer"
   );
 
-  header.querySelector(
-    ".appearance-panel"
-  ).append(motionButton);
+  const motionButton = node(
+    "button",
+    "Pause motion",
+    "motion-toggle"
+  );
 
-  let pointerFrame = 0;
-  let pointerX = 0;
-  let pointerY = 0;
+  motionButton.type = "button";
 
-  function blocked() {
-    return (
-      userPaused ||
-      reduced.matches ||
-      document.body.classList.contains(
-        "contrast"
-      )
-    );
-  }
+  stageFooter.append(
+    waterLink("Explore available water"),
+    motionButton
+  );
 
-  function resetDepth() {
-    cancelAnimationFrame(pointerFrame);
-    pointerFrame = 0;
+  stage.append(stageFooter);
 
-    art.style.setProperty(
-      "--depth-x",
-      "0px"
-    );
-
-    art.style.setProperty(
-      "--depth-y",
-      "0px"
-    );
-  }
-
-  function applyMotion() {
-    const paused = blocked();
+  function applyMotionPreference() {
+    const paused =
+      reducedMotion.matches || userPaused;
 
     document.body.classList.toggle(
       "motion-paused",
       paused
     );
 
-    document.body.classList.toggle(
-      "tab-away",
-      document.hidden
-    );
-
-    root.dataset.motion =
-      paused ? "paused" : "playing";
-
     motionButton.setAttribute(
       "aria-pressed",
       String(paused)
     );
 
-    const contrast =
-      document.body.classList.contains(
-        "contrast"
-      );
-
     motionButton.disabled =
-      reduced.matches || contrast;
+      reducedMotion.matches;
 
-    if (reduced.matches) {
+    if (reducedMotion.matches) {
       motionButton.textContent =
-        "Reduced motion enabled";
-    } else if (contrast) {
-      motionButton.textContent =
-        "Motion off in high contrast";
+        "Reduced motion on";
     } else if (userPaused) {
       motionButton.textContent =
-        "Play animations";
+        "Play motion";
     } else {
       motionButton.textContent =
-        "Pause animations";
+        "Pause motion";
     }
 
-    if (paused || document.hidden) {
-      resetDepth();
+    if (paused) {
+      document.querySelectorAll(
+        ".reveal-ready"
+      ).forEach(item => {
+        item.classList.add("is-visible");
+      });
+    }
+  }
 
-      if (paused) {
-        document.getAnimations?.().forEach(
-          animation => animation.cancel()
+  motionButton.addEventListener(
+    "click",
+    () => {
+      userPaused = !userPaused;
+
+      applyMotionPreference();
+
+      try {
+        localStorage.setItem(
+          motionKey,
+          String(userPaused)
         );
+      } catch {
+        // The current motion setting still applies.
       }
     }
-  }
+  );
 
-  reduced.addEventListener(
+  reducedMotion.addEventListener(
     "change",
-    applyMotion
+    applyMotionPreference
   );
 
-  document.addEventListener(
-    "visibilitychange",
-    applyMotion
-  );
+  applyMotionPreference();
 
-  finePointer.addEventListener(
-    "change",
-    resetDepth
-  );
-
-  let previousContrast =
-    document.body.classList.contains(
-      "contrast"
-    );
-
-  new MutationObserver(() => {
-    const contrast =
-      document.body.classList.contains(
-        "contrast"
-      );
-
-    if (contrast !== previousContrast) {
-      previousContrast = contrast;
-      applyMotion();
-    }
-  }).observe(
-    document.body,
-    {
-      attributes: true,
-      attributeFilter: ["class"]
-    }
-  );
-
-  applyMotion();
-
-  // Gentle depth for a mouse or trackpad.
-  hero.addEventListener(
-    "pointermove",
-    event => {
-      if (
-        blocked() ||
-        document.hidden ||
-        !finePointer.matches
-      ) {
-        return;
-      }
-
-      const bounds =
-        hero.getBoundingClientRect();
-
-      pointerX = (
-        (event.clientX - bounds.left) /
-        bounds.width - .5
-      ) * 12;
-
-      pointerY = (
-        (event.clientY - bounds.top) /
-        bounds.height - .5
-      ) * 8;
-
-      if (pointerFrame) {
-        return;
-      }
-
-      pointerFrame = requestAnimationFrame(
-        () => {
-          art.style.setProperty(
-            "--depth-x",
-            pointerX + "px"
-          );
-
-          art.style.setProperty(
-            "--depth-y",
-            pointerY + "px"
-          );
-
-          pointerFrame = 0;
-        }
-      );
-    }
-  );
-
-  hero.addEventListener(
-    "pointerleave",
-    resetDepth
-  );
-
-  // Keep content clear of the sticky header.
-  function measureHeader() {
-    const clearance =
-      header.getBoundingClientRect().height + 30;
-
-    root.style.setProperty(
-      "--header-clearance",
-      clearance + "px"
-    );
-  }
-
-  if ("ResizeObserver" in window) {
-    new ResizeObserver(
-      measureHeader
-    ).observe(header);
-  } else {
-    window.addEventListener(
-      "resize",
-      measureHeader
-    );
-  }
-
-  measureHeader();
-
-  for (
-    const view of ["collector", "building"]
-  ) {
-    byId(view + "-view").addEventListener(
-      "click",
-      () => {
-        if (blocked()) {
-          byId(
-            view + "-panel"
-          ).scrollIntoView({
-            behavior: "instant",
-            block: "start"
-          });
-        }
-      }
-    );
-  }
-
-  // Reveal stable sections once.
-  // Cards are regularly rebuilt by app.js.
+  // Reveal content as it approaches the screen.
+  // Leave it visible when this browser lacks the observer.
   if ("IntersectionObserver" in window) {
     const observer = new IntersectionObserver(
       entries => {
         for (const entry of entries) {
-          if (!entry.isIntersecting) {
-            continue;
-          }
-
-          if (!blocked()) {
+          if (entry.isIntersecting) {
             entry.target.classList.add(
-              "chapter-reveal"
+              "is-visible"
+            );
+
+            observer.unobserve(
+              entry.target
             );
           }
-
-          observer.unobserve(
-            entry.target
-          );
         }
       },
-      { threshold: 0 }
+      {
+        threshold: 0,
+        rootMargin: "0px 0px 30px 0px"
+      }
     );
 
-    document.querySelectorAll(
-      ".panel, .impact, .journey, .water-safety"
-    ).forEach(item => {
-      observer.observe(item);
-    });
-  }
+    function revealElements() {
+      const elements = document.querySelectorAll(
+        ".impact, .water-safety, .panel, .card, .how-it-works"
+      );
 
-  // Highlight real changes to counters and status messages.
-  const animatedValues = [
-    "impact-litres",
-    "impact-water",
-    "impact-co2",
-    "notice"
-  ];
+      for (const item of elements) {
+        if (
+          item.classList.contains(
+            "reveal-ready"
+          )
+        ) {
+          continue;
+        }
 
-  for (const id of animatedValues) {
-    const target = byId(id);
+        item.classList.add(
+          "reveal-ready"
+        );
 
-    let previousText = target.textContent;
-
-    new MutationObserver(() => {
-      if (
-        target.textContent === previousText
-      ) {
-        return;
+        if (
+          reducedMotion.matches ||
+          userPaused
+        ) {
+          item.classList.add(
+            "is-visible"
+          );
+        } else {
+          observer.observe(item);
+        }
       }
+    }
 
-      previousText = target.textContent;
+    revealElements();
 
-      if (
-        !blocked() &&
-        !document.hidden &&
-        target.animate
-      ) {
-        target.animate(
-          [
-            {
-              opacity: .5,
-              transform: "translateY(6px)"
-            },
-            {
-              opacity: 1,
-              transform: "translateY(0)"
-            }
-          ],
-          {
-            duration: 400,
-            easing: "ease-out"
-          }
+    // New search results and listings also get reveal effects.
+    new MutationObserver(
+      revealElements
+    ).observe(
+      byId("listings"),
+      { childList: true }
+    );
+
+    // Keyboard focus always makes its containing panel visible.
+    document.addEventListener(
+      "focusin",
+      event => {
+        event.target.closest(
+          ".reveal-ready"
+        )?.classList.add(
+          "is-visible"
         );
       }
-    }).observe(
-      target,
-      {
-        childList: true,
-        subtree: true,
-        characterData: true
-      }
     );
   }
 
-  // Gold feedback on button presses.
-  document.addEventListener(
-    "click",
-    event => {
-      const control =
-        event.target.closest("button");
-
-      if (
-        !control ||
-        control.disabled ||
-        blocked()
-      ) {
-        return;
-      }
-
-      const bounds =
-        control.getBoundingClientRect();
-
-      const ripple = node(
-        "span",
-        undefined,
-        "gold-ripple"
-      );
-
-      ripple.setAttribute(
-        "aria-hidden",
-        "true"
-      );
-
-      const x = event.detail
-        ? event.clientX - bounds.left
-        : bounds.width / 2;
-
-      const y = event.detail
-        ? event.clientY - bounds.top
-        : bounds.height / 2;
-
-      ripple.style.left = x + "px";
-      ripple.style.top = y + "px";
-
-      control.append(ripple);
-
-      setTimeout(
-        () => ripple.remove(),
-        650
-      );
-    }
-  );
-
-  // Reading progress.
+  // A subtle line shows page scroll progress.
   const progress = node(
     "div",
     undefined,
@@ -702,40 +404,50 @@
 
   document.body.append(progress);
 
-  let scrollFrame = 0;
+  let scheduled = false;
 
   function updateProgress() {
-    const total =
-      root.scrollHeight - innerHeight;
+    const distance =
+      document.documentElement.scrollHeight -
+      window.innerHeight;
 
-    const fraction = total > 0
-      ? Math.min(
-          1,
-          Math.max(0, scrollY / total)
+    let fraction = 0;
+
+    if (distance > 0) {
+      fraction = Math.min(
+        1,
+        Math.max(
+          0,
+          window.scrollY / distance
         )
-      : 0;
+      );
+    }
 
     progress.style.transform =
       "scaleX(" + fraction + ")";
 
-    scrollFrame = 0;
+    scheduled = false;
   }
 
   function scheduleProgress() {
-    if (!scrollFrame) {
-      scrollFrame = requestAnimationFrame(
-        updateProgress
-      );
+    if (scheduled) {
+      return;
     }
+
+    scheduled = true;
+
+    requestAnimationFrame(
+      updateProgress
+    );
   }
 
-  addEventListener(
+  window.addEventListener(
     "scroll",
     scheduleProgress,
     { passive: true }
   );
 
-  addEventListener(
+  window.addEventListener(
     "resize",
     scheduleProgress
   );
