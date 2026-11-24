@@ -1,24 +1,30 @@
-// Replace the previous motion.js.
-// Load after ui.js.
+// Illustrated DripLoop.
+// Replace the previous motion.js and load after ui.js.
 
 (() => {
   const byId = id =>
     document.getElementById(id);
 
-  const motionKey = "driploop-motion-paused";
+  const root = document.documentElement;
 
-  const reduced = window.matchMedia(
+  const reduced = matchMedia(
     "(prefers-reduced-motion: reduce)"
   );
 
-  const videoUrl =
-    "https://videos.pexels.com/video-files/4631568/4631568-hd_1280_720_24fps.mp4";
-
-  let userPaused = Boolean(
-    navigator.connection?.saveData
+  const finePointer = matchMedia(
+    "(hover: hover) and (pointer: fine)"
   );
 
-  let mediaFailed = false;
+  let userPaused = false;
+
+  try {
+    userPaused =
+      localStorage.getItem(
+        "driploop-motion-paused"
+      ) === "true";
+  } catch {
+    // Use the default when storage is unavailable.
+  }
 
   function node(tag, text, className) {
     const result = document.createElement(tag);
@@ -34,81 +40,94 @@
     return result;
   }
 
-  try {
-    const saved = localStorage.getItem(
-      motionKey
+  function button(text, action, className) {
+    const result = node(
+      "button",
+      text,
+      className
     );
 
-    if (saved !== null) {
-      userPaused = saved === "true";
-    }
-  } catch {
-    // Continue when browser storage is unavailable.
+    result.type = "button";
+    result.addEventListener("click", action);
+
+    return result;
   }
 
-  // ui.js owns the shared colour and mode preferences.
-  // Apply the coastal default only without saved preferences.
-  let hasAppearance = false;
+  // Rename the visible palette while keeping its saved key.
+  const oceanButton = [
+    ...document.querySelectorAll(
+      ".palette-option"
+    )
+  ].find(item =>
+    item.textContent.trim() === "Ocean"
+  );
+
+  const oceanLabel =
+    oceanButton?.querySelector(
+      "span:last-child"
+    );
+
+  if (oceanLabel) {
+    oceanLabel.textContent = "Midnight";
+  }
+
+  let savedAppearance = null;
 
   try {
-    hasAppearance = Boolean(
-      localStorage.getItem(
-        "driploop-appearance-v1"
-      )
+    savedAppearance = localStorage.getItem(
+      "driploop-appearance-v1"
     );
   } catch {
-    // Use the default appearance.
+    // Continue with the default appearance.
   }
 
-  if (!hasAppearance) {
-    const modes = document.querySelectorAll(
+  if (!savedAppearance) {
+    document.querySelectorAll(
       ".mode-options button"
-    );
+    )[1]?.click();
 
-    modes[1]?.click();
-
-    const ocean = [
-      ...document.querySelectorAll(
-        ".palette-option"
-      )
-    ].find(button =>
-      button.textContent.trim() === "Ocean"
-    );
-
-    ocean?.click();
+    oceanButton?.click();
   }
 
-  // One decorative video serves the entire website.
-  const film = node(
+  // Original illustrated background.
+  const art = node(
     "div",
     undefined,
-    "site-film"
+    "night-art"
   );
 
-  film.setAttribute(
+  art.setAttribute(
     "aria-hidden",
     "true"
   );
 
-  const video = node("video");
-
-  video.muted = true;
-  video.defaultMuted = true;
-  video.loop = true;
-  video.playsInline = true;
-  video.preload = "none";
-  video.disablePictureInPicture = true;
-  video.tabIndex = -1;
-
-  video.setAttribute(
-    "aria-hidden",
-    "true"
+  const picture = node(
+    "div",
+    undefined,
+    "night-picture"
   );
 
-  film.append(video);
-  document.body.prepend(film);
+  const lights = node(
+    "div",
+    undefined,
+    "night-lights"
+  );
 
-  // Update the introduction.
+  for (let index = 0; index < 7; index += 1) {
+    const light = node("span");
+
+    light.style.setProperty(
+      "--i",
+      index
+    );
+
+    lights.append(light);
+  }
+
+  art.append(picture, lights);
+  document.body.prepend(art);
+
+  // Introduction.
   const hero = document.querySelector(
     ".hero"
   );
@@ -117,32 +136,29 @@
     ".site-header"
   );
 
-  const steps = hero.querySelector(
-    ".how-it-works"
-  );
+  header.querySelector(
+    ".brand span"
+  ).textContent =
+    "Every drop has another chapter.";
 
-  if (steps) {
-    hero.after(steps);
-  }
+  hero.querySelector(
+    ".eyebrow"
+  ).textContent =
+    "Collected nearby. Given a new purpose.";
 
   hero.querySelector("h1").replaceChildren(
-    node("span", "Every drop."),
+    node("span", "Small drops."),
     node(
       "span",
-      "A second life.",
+      "Big possibilities.",
       "accent-text"
     )
   );
 
   hero.querySelector(
-    ".eyebrow"
-  ).textContent =
-    "Collected by buildings. Put to work by you.";
-
-  hero.querySelector(
     "p:not(.eyebrow)"
   ).textContent =
-    "Find free AC water nearby. Choose your litres. Give them a useful new job.";
+    "Your AC creates water. Help it reach a garden, a workshop or a useful job around the corner.";
 
   hero.append(
     node(
@@ -152,20 +168,108 @@
     )
   );
 
-  const orbit = node(
-    "span",
-    undefined,
-    "film-orbit"
+  // Turn the existing instructions into a collection diagram.
+  const story = hero.querySelector(
+    ".how-it-works"
   );
 
-  orbit.setAttribute(
-    "aria-hidden",
-    "true"
-  );
+  if (story) {
+    story.classList.add("water-story");
 
-  hero.append(orbit);
+    story.setAttribute(
+      "aria-label",
+      "Illustrated water collection journey"
+    );
 
-  // Navigation uses the existing application handlers.
+    const captions = [
+      [
+        "building",
+        "A building collects",
+        "AC water is saved in a tank."
+      ],
+      [
+        "tank",
+        "You choose your litres",
+        "Claim an amount you can collect."
+      ],
+      [
+        "plant",
+        "The water gets a new job",
+        "Confirm pickup to record reuse."
+      ]
+    ];
+
+    [...story.children].forEach(
+      (item, index) => {
+        const [kind, title, copy] =
+          captions[index];
+
+        const icon = node(
+          "div",
+          undefined,
+          "story-icon " + kind
+        );
+
+        icon.setAttribute(
+          "aria-hidden",
+          "true"
+        );
+
+        icon.append(
+          node("i"),
+          node("i"),
+          node("i")
+        );
+
+        item.replaceChildren(
+          icon,
+          node("strong", title),
+          node("span", copy)
+        );
+      }
+    );
+
+    const track = node(
+      "div",
+      undefined,
+      "flow-track"
+    );
+
+    track.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    track.append(
+      node("span"),
+      node("span")
+    );
+
+    const wrapper = node(
+      "section",
+      undefined,
+      "journey"
+    );
+
+    wrapper.setAttribute(
+      "aria-label",
+      "How collection works"
+    );
+
+    hero.after(wrapper);
+
+    wrapper.append(
+      track,
+      story,
+      node(
+        "p",
+        "Illustration of the collection journey.",
+        "journey-caption"
+      )
+    );
+  }
+
+  // Navigation.
   const navigation = node(
     "nav",
     undefined,
@@ -177,14 +281,14 @@
     "Main navigation"
   );
 
-  const findWater = node(
+  const find = node(
     "a",
     "Find water"
   );
 
-  findWater.href = "#collector-panel";
+  find.href = "#collector-panel";
 
-  findWater.addEventListener(
+  find.addEventListener(
     "click",
     event => {
       event.preventDefault();
@@ -199,10 +303,7 @@
 
   pickups.href = "#claims-heading";
 
-  navigation.append(
-    findWater,
-    pickups
-  );
+  navigation.append(find, pickups);
 
   header.querySelector(
     ".appearance"
@@ -212,34 +313,35 @@
     ".appearance > summary"
   ).textContent = "Style & motion";
 
-  // Motion controls live in the persistent appearance menu.
-  const motionButton = node(
-    "button",
+  // Motion preference.
+  const motionButton = button(
     "Pause animations",
+    () => {
+      userPaused = !userPaused;
+
+      try {
+        localStorage.setItem(
+          "driploop-motion-paused",
+          String(userPaused)
+        );
+      } catch {
+        // Apply the setting for this visit.
+      }
+
+      applyMotion();
+    },
     "secondary motion-toggle"
-  );
-
-  motionButton.type = "button";
-
-  const mediaMessage = node(
-    "p",
-    "",
-    "motion-message"
-  );
-
-  mediaMessage.setAttribute(
-    "role",
-    "status"
   );
 
   header.querySelector(
     ".appearance-panel"
-  ).append(
-    motionButton,
-    mediaMessage
-  );
+  ).append(motionButton);
 
-  function motionBlocked() {
+  let pointerFrame = 0;
+  let pointerX = 0;
+  let pointerY = 0;
+
+  function blocked() {
     return (
       userPaused ||
       reduced.matches ||
@@ -249,34 +351,54 @@
     );
   }
 
-  function applyMotion() {
-    const blocked = motionBlocked();
+  function resetDepth() {
+    cancelAnimationFrame(pointerFrame);
+    pointerFrame = 0;
 
-    document.documentElement.dataset.motion =
-      blocked ? "paused" : "playing";
+    art.style.setProperty(
+      "--depth-x",
+      "0px"
+    );
+
+    art.style.setProperty(
+      "--depth-y",
+      "0px"
+    );
+  }
+
+  function applyMotion() {
+    const paused = blocked();
 
     document.body.classList.toggle(
       "motion-paused",
-      blocked
+      paused
     );
 
-    const highContrast =
+    document.body.classList.toggle(
+      "tab-away",
+      document.hidden
+    );
+
+    root.dataset.motion =
+      paused ? "paused" : "playing";
+
+    motionButton.setAttribute(
+      "aria-pressed",
+      String(paused)
+    );
+
+    const contrast =
       document.body.classList.contains(
         "contrast"
       );
 
     motionButton.disabled =
-      reduced.matches || highContrast;
-
-    motionButton.setAttribute(
-      "aria-pressed",
-      String(blocked)
-    );
+      reduced.matches || contrast;
 
     if (reduced.matches) {
       motionButton.textContent =
         "Reduced motion enabled";
-    } else if (highContrast) {
+    } else if (contrast) {
       motionButton.textContent =
         "Motion off in high contrast";
     } else if (userPaused) {
@@ -287,102 +409,16 @@
         "Pause animations";
     }
 
-    if (blocked) {
-      document.getAnimations?.().forEach(
-        animation => animation.cancel()
-      );
-    }
+    if (paused || document.hidden) {
+      resetDepth();
 
-    if (
-      blocked ||
-      document.hidden ||
-      mediaFailed
-    ) {
-      video.pause();
-      return;
-    }
-
-    // Delay the download until motion is allowed.
-    if (!video.getAttribute("src")) {
-      video.src = videoUrl;
-    }
-
-    video.play()?.then(() => {
-      if (
-        motionBlocked() ||
-        document.hidden
-      ) {
-        video.pause();
+      if (paused) {
+        document.getAnimations?.().forEach(
+          animation => animation.cancel()
+        );
       }
-    }).catch(() => {
-      if (
-        motionBlocked() ||
-        document.hidden ||
-        mediaFailed
-      ) {
-        return;
-      }
-
-      userPaused = true;
-
-      mediaMessage.textContent =
-        "Your browser paused the video. Tap Play animations to try again.";
-
-      applyMotion();
-    });
+    }
   }
-
-  video.addEventListener(
-    "playing",
-    () => {
-      if (
-        motionBlocked() ||
-        document.hidden
-      ) {
-        video.pause();
-      } else {
-        film.classList.add(
-          "video-ready"
-        );
-
-        mediaMessage.textContent = "";
-      }
-    }
-  );
-
-  video.addEventListener(
-    "error",
-    () => {
-      mediaFailed = true;
-
-      film.classList.remove(
-        "video-ready"
-      );
-
-      video.pause();
-
-      mediaMessage.textContent =
-        "The background video is unavailable. The still image is shown.";
-    }
-  );
-
-  motionButton.addEventListener(
-    "click",
-    () => {
-      userPaused = !userPaused;
-
-      try {
-        localStorage.setItem(
-          motionKey,
-          String(userPaused)
-        );
-      } catch {
-        // The preference still applies for this visit.
-      }
-
-      applyMotion();
-    }
-  );
 
   reduced.addEventListener(
     "change",
@@ -394,7 +430,11 @@
     applyMotion
   );
 
-  // React to the existing high-contrast control.
+  finePointer.addEventListener(
+    "change",
+    resetDepth
+  );
+
   let previousContrast =
     document.body.classList.contains(
       "contrast"
@@ -420,12 +460,64 @@
 
   applyMotion();
 
-  // Keep section headings below the sticky header.
+  // Gentle depth for a mouse or trackpad.
+  hero.addEventListener(
+    "pointermove",
+    event => {
+      if (
+        blocked() ||
+        document.hidden ||
+        !finePointer.matches
+      ) {
+        return;
+      }
+
+      const bounds =
+        hero.getBoundingClientRect();
+
+      pointerX = (
+        (event.clientX - bounds.left) /
+        bounds.width - .5
+      ) * 12;
+
+      pointerY = (
+        (event.clientY - bounds.top) /
+        bounds.height - .5
+      ) * 8;
+
+      if (pointerFrame) {
+        return;
+      }
+
+      pointerFrame = requestAnimationFrame(
+        () => {
+          art.style.setProperty(
+            "--depth-x",
+            pointerX + "px"
+          );
+
+          art.style.setProperty(
+            "--depth-y",
+            pointerY + "px"
+          );
+
+          pointerFrame = 0;
+        }
+      );
+    }
+  );
+
+  hero.addEventListener(
+    "pointerleave",
+    resetDepth
+  );
+
+  // Keep content clear of the sticky header.
   function measureHeader() {
     const clearance =
       header.getBoundingClientRect().height + 30;
 
-    document.documentElement.style.setProperty(
+    root.style.setProperty(
       "--header-clearance",
       clearance + "px"
     );
@@ -444,14 +536,13 @@
 
   measureHeader();
 
-  // Respect the motion preference for role-switch scrolling.
   for (
     const view of ["collector", "building"]
   ) {
     byId(view + "-view").addEventListener(
       "click",
       () => {
-        if (motionBlocked()) {
+        if (blocked()) {
           byId(
             view + "-panel"
           ).scrollIntoView({
@@ -463,11 +554,9 @@
     );
   }
 
-  // Animate each section once as it enters the screen.
-  // Content stays visible while waiting for the observer.
+  // Reveal stable sections once.
+  // Cards are regularly rebuilt by app.js.
   if ("IntersectionObserver" in window) {
-    const seen = new WeakSet();
-
     const observer = new IntersectionObserver(
       entries => {
         for (const entry of entries) {
@@ -475,9 +564,9 @@
             continue;
           }
 
-          if (!motionBlocked()) {
+          if (!blocked()) {
             entry.target.classList.add(
-              "film-reveal"
+              "chapter-reveal"
             );
           }
 
@@ -486,61 +575,92 @@
           );
         }
       },
-      {
-        threshold: 0,
-        rootMargin: "0px 0px 20px 0px"
-      }
+      { threshold: 0 }
     );
 
-    function observeSections() {
-      const sections =
-        document.querySelectorAll(
-          ".panel, .card, .impact, .how-it-works, .water-safety"
-        );
+    document.querySelectorAll(
+      ".panel, .impact, .journey, .water-safety"
+    ).forEach(item => {
+      observer.observe(item);
+    });
+  }
 
-      for (const item of sections) {
-        if (seen.has(item)) {
-          continue;
-        }
+  // Highlight real changes to counters and status messages.
+  const animatedValues = [
+    "impact-litres",
+    "impact-water",
+    "impact-co2",
+    "notice"
+  ];
 
-        seen.add(item);
-        observer.observe(item);
+  for (const id of animatedValues) {
+    const target = byId(id);
+
+    let previousText = target.textContent;
+
+    new MutationObserver(() => {
+      if (
+        target.textContent === previousText
+      ) {
+        return;
       }
-    }
 
-    observeSections();
+      previousText = target.textContent;
 
-    new MutationObserver(
-      observeSections
-    ).observe(
-      byId("listings"),
-      { childList: true }
+      if (
+        !blocked() &&
+        !document.hidden &&
+        target.animate
+      ) {
+        target.animate(
+          [
+            {
+              opacity: .5,
+              transform: "translateY(6px)"
+            },
+            {
+              opacity: 1,
+              transform: "translateY(0)"
+            }
+          ],
+          {
+            duration: 400,
+            easing: "ease-out"
+          }
+        );
+      }
+    }).observe(
+      target,
+      {
+        childList: true,
+        subtree: true,
+        characterData: true
+      }
     );
   }
 
-  // Give mouse, touch and keyboard button clicks feedback.
+  // Gold feedback on button presses.
   document.addEventListener(
     "click",
     event => {
-      const button = event.target.closest(
-        "button"
-      );
+      const control =
+        event.target.closest("button");
 
       if (
-        !button ||
-        button.disabled ||
-        motionBlocked()
+        !control ||
+        control.disabled ||
+        blocked()
       ) {
         return;
       }
 
       const bounds =
-        button.getBoundingClientRect();
+        control.getBoundingClientRect();
 
       const ripple = node(
         "span",
         undefined,
-        "click-ripple"
+        "gold-ripple"
       );
 
       ripple.setAttribute(
@@ -559,69 +679,16 @@
       ripple.style.left = x + "px";
       ripple.style.top = y + "px";
 
-      button.append(ripple);
+      control.append(ripple);
 
       setTimeout(
         () => ripple.remove(),
-        600
+        650
       );
     }
   );
 
-  // Highlight actual value changes.
-  const animatedValues = [
-    "impact-litres",
-    "impact-water",
-    "impact-co2",
-    "notice"
-  ];
-
-  for (const id of animatedValues) {
-    const target = byId(id);
-
-    let previousText = target.textContent;
-
-    new MutationObserver(() => {
-      if (
-        previousText === target.textContent
-      ) {
-        return;
-      }
-
-      previousText = target.textContent;
-
-      if (
-        !motionBlocked() &&
-        target.animate
-      ) {
-        target.animate(
-          [
-            {
-              opacity: .55,
-              transform: "translateY(5px)"
-            },
-            {
-              opacity: 1,
-              transform: "translateY(0)"
-            }
-          ],
-          {
-            duration: 350,
-            easing: "ease-out"
-          }
-        );
-      }
-    }).observe(
-      target,
-      {
-        childList: true,
-        characterData: true,
-        subtree: true
-      }
-    );
-  }
-
-  // Scroll progress.
+  // Reading progress.
   const progress = node(
     "div",
     undefined,
@@ -635,69 +702,43 @@
 
   document.body.append(progress);
 
-  let scheduled = false;
+  let scrollFrame = 0;
 
   function updateProgress() {
     const total =
-      document.documentElement.scrollHeight -
-      window.innerHeight;
+      root.scrollHeight - innerHeight;
 
     const fraction = total > 0
-      ? Math.max(
-          0,
-          Math.min(1, window.scrollY / total)
+      ? Math.min(
+          1,
+          Math.max(0, scrollY / total)
         )
       : 0;
 
     progress.style.transform =
       "scaleX(" + fraction + ")";
 
-    scheduled = false;
+    scrollFrame = 0;
   }
 
   function scheduleProgress() {
-    if (scheduled) {
-      return;
+    if (!scrollFrame) {
+      scrollFrame = requestAnimationFrame(
+        updateProgress
+      );
     }
-
-    scheduled = true;
-
-    requestAnimationFrame(
-      updateProgress
-    );
   }
 
-  window.addEventListener(
+  addEventListener(
     "scroll",
     scheduleProgress,
     { passive: true }
   );
 
-  window.addEventListener(
+  addEventListener(
     "resize",
     scheduleProgress
   );
 
   updateProgress();
-
-  // Credit the background footage.
-  const credit = node(
-    "p",
-    undefined,
-    "media-credit"
-  );
-
-  const creditLink = node(
-    "a",
-    "Ocean footage by ArtHouse Studio / Pexels"
-  );
-
-  creditLink.href =
-    "https://www.pexels.com/video/aerial-view-of-ocean-waves-4631568/";
-
-  credit.append(creditLink);
-
-  document.querySelector(
-    "body > footer"
-  ).append(credit);
 })();
