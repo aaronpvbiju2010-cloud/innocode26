@@ -1,0 +1,648 @@
+@import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Cormorant+Garamond:wght@500;600&family=DM+Sans:wght@400;500;600;700&display=swap");
+
+/* Ocean palette — light */
+
+:root[data-palette="ocean"] {
+  --bg: #f8f3e8;
+  --surface: #fffdf7;
+  --text: #153044;
+  --muted: #58636c;
+  --accent: #b73d20;
+  --on-accent: #ffffff;
+  --soft: #f2e7d8;
+  --border: #d6c9b5;
+}
+
+/* Ocean palette — dark */
+
+:root[data-mode="dark"][data-palette="ocean"] {
+  --bg: #071827;
+  --surface: #0d2335;
+  --text: #f6e8c9;
+  --muted: #b7c3ca;
+  --accent: #ff946b;
+  --on-accent: #251108;
+  --soft: #132c40;
+  --border: #345063;
+  --shadow: 0 24px 70px rgb(0 0 0 / 22%);
+}
+
+/* Typography */
+
+body {
+  font-family: "DM Sans", system-ui, sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+h2 {
+  letter-spacing: -.04em;
+}
+
+.brand {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 2.2rem;
+  font-weight: 600;
+  letter-spacing: -.035em;
+}
+
+.brand span {
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: .8rem;
+  letter-spacing: .02em;
+}
+
+/* Full-width ocean introduction */
+
+.night-stage {
+  --hero-cream: #f6e8c9;
+  --hero-orange: #ff875d;
+
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  min-height: min(940px, 100svh);
+  background: #061827;
+  color: var(--hero-cream);
+}
+
+.night-scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.night-scene::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background-image:
+    linear-gradient(
+      180deg,
+      rgb(3 19 34 / 94%) 0%,
+      rgb(4 22 37 / 79%) 45%,
+      rgb(4 22 37 / 45%) 100%
+    ),
+    url("https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=2400&q=85");
+
+  background-size: cover;
+  background-position: center, center 65%;
+  transform: scale(1.04);
+  animation: ocean-drift 24s ease-in-out infinite alternate;
+}
+
+.night-scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background:
+    radial-gradient(
+      ellipse at 50% 32%,
+      transparent 20%,
+      rgb(0 12 25 / 35%) 90%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 3px,
+      rgb(246 232 201 / 2%) 3px 4px
+    );
+
+  opacity: .65;
+}
+
+/* Header */
+
+.night-stage .site-header {
+  width: min(1360px, calc(100% - 64px));
+  padding-block: 25px;
+  border-color: rgb(246 232 201 / 20%);
+  flex-wrap: wrap;
+}
+
+.night-stage .brand,
+.night-stage .brand span {
+  color: var(--hero-cream);
+}
+
+.hero-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 26px;
+  margin-left: auto;
+}
+
+.hero-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--hero-cream);
+  text-decoration: none;
+  font-size: .95rem;
+  border-bottom: 1px solid transparent;
+}
+
+.hero-nav a:hover {
+  border-color: var(--hero-orange);
+}
+
+.night-stage .appearance > summary {
+  color: var(--hero-cream);
+  background: rgb(6 24 39 / 80%);
+  border-color: rgb(246 232 201 / 35%);
+  border-radius: 999px;
+}
+
+.night-stage .appearance-panel {
+  color: var(--text);
+  z-index: 20;
+}
+
+/* Hero content */
+
+.night-stage .hero {
+  flex: 1;
+  width: min(1120px, calc(100% - 48px));
+  margin-inline: auto;
+  padding: clamp(44px, 7vw, 90px) 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+}
+
+.night-stage .eyebrow {
+  color: var(--hero-cream);
+  text-transform: uppercase;
+  letter-spacing: .18em;
+  font-size: .875rem;
+  margin-bottom: 20px;
+  animation: arrival .8s both;
+}
+
+.night-stage h1 {
+  font-family:
+    "Barlow Condensed",
+    Impact,
+    "Arial Narrow",
+    sans-serif;
+
+  font-weight: 800;
+  font-size: clamp(3.5rem, 10vw, 9.5rem);
+  line-height: .93;
+  letter-spacing: -.025em;
+  text-transform: uppercase;
+  color: var(--hero-cream);
+}
+
+.night-stage h1 span {
+  animation: title-arrival .9s both;
+}
+
+.night-stage h1 .accent-text {
+  color: var(--hero-orange);
+  margin-top: 12px;
+  animation-delay: .12s;
+}
+
+.night-stage .hero > p:not(.eyebrow) {
+  color: var(--hero-cream);
+  max-width: 580px;
+  margin: 28px 0;
+  font-size: clamp(1rem, 1.6vw, 1.2rem);
+  animation: arrival .9s .2s both;
+}
+
+.night-stage .role-switch {
+  justify-content: center;
+  gap: 16px;
+  animation: arrival .9s .3s both;
+}
+
+.night-stage .role-switch button {
+  min-width: 190px;
+  min-height: 56px;
+  padding-inline: 28px;
+  border-radius: 999px;
+
+  background: #c23b1c;
+  color: #fff9eb;
+  border-color: #c23b1c;
+
+  box-shadow:
+    inset 0 0 0 3px #c23b1c,
+    inset 0 0 0 4px #ffe6b9;
+}
+
+.night-stage .role-switch button.secondary {
+  color: var(--hero-cream);
+  background: rgb(6 24 39 / 65%);
+  border-color: rgb(246 232 201 / 65%);
+  box-shadow: none;
+}
+
+.night-stage .hero > p.hero-safety {
+  margin: 20px 0 0;
+  font-size: .875rem;
+  color: #e4d6ba;
+}
+
+/* Bottom edge of the hero */
+
+.stage-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+
+  width: min(1360px, calc(100% - 64px));
+  margin-inline: auto;
+  padding-block: 18px;
+  border-top: 1px solid rgb(246 232 201 / 25%);
+}
+
+.stage-footer a {
+  color: var(--hero-cream);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  text-underline-offset: 5px;
+}
+
+.motion-toggle {
+  color: var(--hero-cream);
+  background: transparent;
+  border: 1px solid rgb(246 232 201 / 40%);
+  border-radius: 999px;
+  min-height: 44px;
+  padding: 10px 18px;
+  font-size: .875rem;
+}
+
+/* Decorative water movement */
+
+.water-rings {
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  bottom: -150px;
+  left: calc(50% - 130px);
+}
+
+.water-rings span {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgb(246 232 201 / 30%);
+  border-radius: 50%;
+  animation: water-ring 7s ease-out infinite;
+}
+
+.water-rings span:nth-child(2) {
+  animation-delay: -2.3s;
+}
+
+.water-rings span:nth-child(3) {
+  animation-delay: -4.6s;
+}
+
+/* Page progress */
+
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  z-index: 100;
+  pointer-events: none;
+  background: var(--accent);
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
+/* Main application */
+
+main.wrap {
+  padding-top: 30px;
+  padding-bottom: 18px;
+}
+
+main > .how-it-works {
+  margin: 0 0 28px;
+  background: transparent;
+  border-radius: 0;
+  border-inline: 0;
+}
+
+.how-it-works li {
+  padding-block: 24px;
+}
+
+.how-it-works strong {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.5rem;
+}
+
+.panel {
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+
+.impact {
+  border-radius: 18px;
+}
+
+.impact strong {
+  font-family: "Barlow Condensed", Impact, sans-serif;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.section-heading {
+  margin-top: 56px;
+}
+
+.section-heading h2 {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 600;
+}
+
+.card {
+  border-radius: 18px;
+  transition:
+    transform .25s,
+    box-shadow .25s,
+    border-color .25s;
+}
+
+.card .actions button {
+  border-radius: 999px;
+}
+
+.use-button {
+  border-radius: 16px;
+}
+
+.use-icon {
+  transition: transform .25s;
+}
+
+.source-details[open] dl {
+  animation: arrival .3s both;
+}
+
+dialog[open] {
+  animation: dialog-arrival .25s both;
+}
+
+/* Scroll reveals */
+
+.reveal-ready {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity .65s, transform .65s;
+}
+
+.reveal-ready.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (hover: hover) {
+  .card.is-visible:hover {
+    transform: translateY(-6px);
+  }
+
+  .use-button:hover .use-icon {
+    transform: translateY(-3px) rotate(-5deg);
+  }
+
+  .night-stage .role-switch button:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.08);
+  }
+}
+
+/* Animation keyframes */
+
+@keyframes ocean-drift {
+  from {
+    transform: scale(1.04) translateY(0);
+  }
+
+  to {
+    transform: scale(1.1) translateY(-1%);
+  }
+}
+
+@keyframes water-ring {
+  from {
+    transform: scale(.4);
+    opacity: .6;
+  }
+
+  to {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+@keyframes arrival {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes title-arrival {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dialog-arrival {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Background-motion controls */
+
+body.motion-paused .night-scene::before,
+body.motion-paused .water-rings span {
+  animation-play-state: paused;
+}
+
+body.motion-paused .reveal-ready {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+/* High contrast */
+
+body.contrast .night-stage {
+  --hero-cream: #fff;
+  --hero-orange: #ffeb00;
+  background: #000;
+}
+
+body.contrast .night-scene {
+  display: none;
+}
+
+body.contrast .night-stage .role-switch button {
+  background: #ffeb00;
+  color: #000;
+  border-color: #ffeb00;
+  box-shadow: none;
+}
+
+body.contrast .night-stage .role-switch button.secondary {
+  background: #000;
+  color: #ffeb00;
+}
+
+body.contrast .night-stage .appearance > summary,
+body.contrast .motion-toggle {
+  background: #000;
+  color: #fff;
+  border-color: #ffeb00;
+}
+
+body.contrast .night-stage .hero > p.hero-safety {
+  color: #fff;
+}
+
+.night-stage :focus-visible {
+  outline-color: var(--hero-orange);
+}
+
+/* Tablets */
+
+@media (max-width: 760px) {
+  .night-stage .site-header {
+    width: calc(100% - 32px);
+    gap: 14px;
+  }
+
+  .hero-nav {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    gap: 32px;
+    margin: 0;
+  }
+
+  .night-stage .appearance {
+    margin-left: auto;
+  }
+
+  .night-stage .hero {
+    width: calc(100% - 32px);
+    padding-block: 44px;
+  }
+
+  .stage-footer {
+    width: calc(100% - 32px);
+  }
+}
+
+/* Small phones */
+
+@media (max-width: 440px) {
+  .night-stage .brand {
+    font-size: 1.8rem;
+  }
+
+  .night-stage .brand span {
+    max-width: 130px;
+    font-size: .75rem;
+  }
+
+  .night-stage h1 {
+    font-size: clamp(3.25rem, 15vw, 4.5rem);
+  }
+
+  .night-stage .eyebrow {
+    font-size: .8rem;
+    letter-spacing: .1em;
+  }
+
+  .night-stage .role-switch {
+    width: 100%;
+    gap: 12px;
+  }
+
+  .night-stage .role-switch button {
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+
+  .stage-footer {
+    justify-content: center;
+    padding-block: 16px;
+  }
+}
+
+/* Short landscape screens */
+
+@media (max-height: 560px) and (min-width: 761px) {
+  .night-stage .hero {
+    padding-block: 32px;
+  }
+
+  .night-stage h1 {
+    font-size: 5rem;
+  }
+}
+
+/* Respect device accessibility preferences */
+
+@media (prefers-reduced-motion: reduce) {
+  .night-stage *,
+  .night-stage *::before,
+  .night-stage *::after,
+  .source-details[open] dl,
+  dialog[open] {
+    animation: none !important;
+  }
+
+  .reveal-ready {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
